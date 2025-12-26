@@ -87,63 +87,188 @@ print(f"Total Value: ${coupons + payoff:.2f}")
 
 ```
 UBS_FinAI/
-├── src/                    # Core source code
-│   ├── prompts.py          # Extraction orchestrator
-│   ├── llm_client.py       # LLM API client
-│   ├── payoff_single.py    # Single underlying payoff engine
-│   └── payoff_worst_of.py  # Worst-of payoff engine
-├── tests/                  # Test files
-├── scripts/                # Utility scripts
-├── data/                   # Input PDF files
-├── results/                # Output JSON files
-└── docs/                   # Documentation
-
-For detailed structure, see [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
+│
+├── src/                              # 🔧 Core source code
+│   ├── config.py                     # Configuration and API key management
+│   ├── llm_client.py                 # Unified LLM API client (OpenAI/Anthropic/DeepSeek)
+│   ├── document_loader.py            # PDF text extraction utilities
+│   ├── prompt.py                     # LLM prompt templates
+│   ├── prompts.py                    # PayoffExtractor - main extraction orchestrator
+│   ├── payoff_ready_validator.py     # Schema validation before payoff calculation
+│   ├── payoff_single.py              # Single underlying Phoenix payoff engine
+│   └── payoff_worst_of.py            # Worst-of Phoenix payoff engine
+│
+├── tests/                            # 🧪 Test files
+│   ├── test.py                       # Main extraction test suite
+│   ├── test_case.py                  # Test case definitions with expected outcomes
+│   └── test_payoff_engines.py        # Integration tests for payoff engines
+│
+├── scripts/                          # 🛠️ Utility scripts
+│   ├── calculate_payoff_from_json.py # Calculate payoffs from extraction JSON
+│   └── compare_with_ground_truth.py  # Accuracy evaluation against ground truth
+│
+├── data/                             # 📄 Input data
+│   ├── BNP-PhoenixSnowball-SP500-XS1083630027-TS.pdf
+│   └── IT0006764473-TS.pdf
+│
+├── results/                          # 📊 Output files (not in git)
+│   ├── test_results_*.json           # Extraction results with timestamps
+│   ├── payoff_results_*.json         # Payoff calculation results
+│   └── *_comparison.json             # Ground truth comparison reports
+│
+├── docs/                             # 📚 Documentation
+│   ├── README_PAYOFF_READY.md        # Detailed payoff system documentation
+│   ├── PROJECT_STRUCTURE.md          # Complete project structure guide
+│   ├── SETUP.md                      # Setup and installation instructions
+│   ├── GITHUB_UPLOAD_GUIDE.md        # GitHub upload guide
+│   ├── BNP Phoenix Snowball analysis.pdf
+│   ├── term_sheet_extraction.pdf
+│   └── termsheet search keywords.docx
+│
+├── README.md                         # This file
+├── requirements.txt                  # Python dependencies
+├── LICENSE                           # MIT License
+├── .gitignore                        # Git ignore rules
+└── LLM_variables.env                 # API keys configuration (not in git)
 ```
+
+### Core Module Descriptions
+
+#### `src/` - Core Source Code
+
+| File | Description |
+|------|-------------|
+| **config.py** | Loads API keys from `LLM_variables.env`, manages LLM provider settings |
+| **llm_client.py** | Unified client for OpenAI, Anthropic, DeepSeek APIs with automatic retry |
+| **document_loader.py** | PDF text extraction using `pypdf`, text chunking for LLM processing |
+| **prompt.py** | LLM prompt templates for extraction, validation, and section parsing |
+| **prompts.py** | `PayoffExtractor` class - orchestrates extraction with post-processing rules |
+| **payoff_ready_validator.py** | Safety validation: schema checks, required fields, type enforcement |
+| **payoff_single.py** | Payoff calculator for single-underlying Phoenix products |
+| **payoff_worst_of.py** | Payoff calculator for worst-of Phoenix products with memory coupons |
+
+#### `tests/` - Test Suite
+
+| File | Description |
+|------|-------------|
+| **test.py** | Runs extraction on test PDFs, validates schema, saves results to JSON |
+| **test_case.py** | Defines test cases with expected structure types and required fields |
+| **test_payoff_engines.py** | Integration tests with simulated market scenarios (bullish/bearish/sideways) |
+
+#### `scripts/` - Utility Scripts
+
+| File | Description |
+|------|-------------|
+| **calculate_payoff_from_json.py** | End-to-end: reads extraction JSON → validates → calculates payoffs → saves results |
+| **compare_with_ground_truth.py** | Compares AI extraction against human-verified ground truth, generates accuracy report |
 
 ---
 
-## 🔧 Architecture
+## 🔧 System Architecture
 
 ```
-PDF → Document Loader → LLM Extraction → Post-Processing → 
-Validation → Payoff Calculation → Results
+┌─────────────────────────────────────────────────────────────┐
+│                      PDF Term Sheet                          │
+└───────────────────────┬─────────────────────────────────────┘
+                        ↓
+              ┌─────────────────────┐
+              │  Document Loader    │ (pypdf)
+              │  - Extract text     │
+              │  - Page splitting   │
+              └──────────┬──────────┘
+                         ↓
+              ┌─────────────────────┐
+              │  PayoffExtractor    │ (LLM + Prompt)
+              │  - Chunk processing │
+              │  - JSON extraction  │
+              └──────────┬──────────┘
+                         ↓
+              ┌─────────────────────┐
+              │  Post-Processor     │ ✅ Deterministic Rules
+              │  - Deduplicate      │
+              │  - Normalize type   │
+              │  - Clean noise      │
+              └──────────┬──────────┘
+                         ↓
+              ┌─────────────────────┐
+              │  Payoff Validator   │ ✅ Safety Guardrail
+              │  - Schema check     │
+              │  - Required fields  │
+              └──────────┬──────────┘
+                         ↓
+              ┌─────────────────────┐
+              │  Payoff Engine      │
+              │  - Single Phoenix   │
+              │  - Worst-of Phoenix │
+              └─────────────────────┘
 ```
 
-### Key Components
+### Key Innovations
 
-- **Hybrid AI + Rules**: LLM intelligence + deterministic post-processing
-- **Post-Processing**: Deduplicates underlyings, normalizes structure type
-- **Validation Layer**: Schema validation before payoff calculation
-- **Payoff Engines**: Separate calculators for single/worst-of products
+✅ **Hybrid AI + Rules**: LLM semantic understanding + deterministic post-processing  
+✅ **Underlying Deduplication**: Same name = same asset, merge fields  
+✅ **Structure Type Inference**: Automatically determine single/worst-of from # of underlyings  
+✅ **Barrier Calculation**: Uses `barrier_prices` when `barrier_level` is ambiguous  
+✅ **Separated Coupon Accounting**: Fixed vs. conditional coupons clearly tracked
 
 ---
 
-## ✅ Accuracy
+## ✅ Accuracy Metrics
 
 Tested on real term sheets from BNP Paribas and Natixis:
 
 | Metric | Score |
 |--------|-------|
-| Structure Type | 100% (2/2) |
+| Structure Type Classification | 100% (2/2) |
 | Underlying Extraction | 100% (4/4) |
 | Date Extraction | 100% (49/49) |
+| Payoff Component Coverage | 100% |
 | **Overall Payoff-Ready** | **100%** |
 
+### Tested Products
+
+1. **BNP Phoenix Snowball on S&P 500**
+   - Structure: Single underlying
+   - Features: Conditional coupon, autocall, knock-in
+
+2. **Natixis Phoenix on AMD/NVDA/INTC**
+   - Structure: Worst-of
+   - Features: Fixed coupon, memory coupon, autocall
+
 ---
 
-## 📝 Documentation
+## 📚 Documentation
 
-- **[Setup Guide](docs/SETUP.md)** - Detailed installation and configuration
-- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Code organization
-- **[Payoff System](docs/README_PAYOFF_READY.md)** - Technical details
-- **[GitHub Guide](docs/GITHUB_UPLOAD_GUIDE.md)** - Contribution guide
+For more detailed information:
+
+- **[Setup Guide](docs/SETUP.md)** - Installation, configuration, and troubleshooting
+- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Detailed module documentation and data flow
+- **[Payoff System](docs/README_PAYOFF_READY.md)** - Technical details on payoff calculation
+- **[GitHub Guide](docs/GITHUB_UPLOAD_GUIDE.md)** - Contribution and deployment guide
 
 ---
 
-## 🚨 Disclaimer
+## 🚨 Safety & Disclaimer
 
-⚠️ This is a research/prototype system. Always verify extracted data and calculated payoffs against official term sheets before using for trading or client-facing purposes.
+### ✅ Recommended Use
+- Automatic payoff code generation with human review
+- Historical scenario analysis
+- Research and prototyping
+- FinTech demos with oversight
+
+### ❌ Not Yet Recommended
+- Fully automated trading without verification
+- Client-facing pricing without spot-checks
+- Sole source of truth for risk management
+
+### 🛡️ Safety Protocol
+Always:
+1. Run `payoff_ready_validator` before calculations
+2. Spot-check extracted parameters against term sheets
+3. Review validation warnings
+4. Maintain human-in-the-loop for production
+
+⚠️ **This is a research/prototype system.** Always verify extracted data and calculated payoffs against official term sheets.
 
 ---
 
@@ -151,35 +276,38 @@ Tested on real term sheets from BNP Paribas and Natixis:
 
 This project builds upon and extends the original work from:
 
+### Original Framework
 - **[gdgdandsz/UBS_termsheet](https://github.com/gdgdandsz/UBS_termsheet)** - Original term sheet extraction framework  
   Special thanks for the foundational extraction architecture and LLM integration approach.
 
-- **Team Members' Analysis**:
-  - BNP Phoenix Snowball analysis documentation
-  - Term sheet extraction methodology research
-  - Financial product structure analysis
+### Team Contributions
+- **BNP Phoenix Snowball Analysis** (docs/) - Detailed product structure analysis
+- **Term Sheet Extraction Research** (docs/) - Methodology and keyword research
+- **Team Members' Financial Analysis** - Product structure validation and testing
 
 ### Enhancements in This Version
 
 - ✨ Organized project structure with `src/`, `tests/`, `scripts/` separation
 - ✨ Dedicated payoff calculation engines for single and worst-of products
 - ✨ Post-processing layer with deterministic rules for data normalization
-- ✨ Payoff validation system with schema checking
-- ✨ Ground truth comparison and accuracy evaluation
+- ✨ Payoff validation system with schema checking and safety guardrails
+- ✨ Ground truth comparison and accuracy evaluation framework
 - ✨ Comprehensive documentation and usage examples
 - ✨ Support for multiple LLM providers (OpenAI, Anthropic, DeepSeek)
-
----
-
-## 📧 Contact
-
-For questions or issues, please open a [GitHub issue](https://github.com/Yixtk/UBS_FinAI/issues).
+- ✨ Separated fixed/conditional coupon accounting
+- ✨ Barrier calculation from prices when levels are ambiguous
 
 ---
 
 ## 📝 License
 
 MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+## 📧 Contact
+
+For questions or issues, please open a [GitHub issue](https://github.com/Yixtk/UBS_FinAI/issues).
 
 ---
 
