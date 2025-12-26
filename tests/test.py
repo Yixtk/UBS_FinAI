@@ -1,9 +1,16 @@
 # tests/test_extractor.py
 
 import json
+import sys
+from pathlib import Path
 from datetime import datetime
-from prompts import PayoffExtractor
-from test_case import TEST_CASES
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.prompts import PayoffExtractor
+from tests.test_case import TEST_CASES
 
 
 def check_schema(result):

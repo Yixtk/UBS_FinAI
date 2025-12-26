@@ -3,7 +3,7 @@ Direct LLM API client without LangChain dependencies
 """
 import json
 from typing import Dict, List, Optional
-from config import (
+from src.config import (
     OPENAI_API_KEY,
     ANTHROPIC_API_KEY,
     DEEPSEEK_API_KEY,

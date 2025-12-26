@@ -4,10 +4,17 @@ Calculate Payoff from Extracted JSON and Save Results
 Complete pipeline: JSON → Validation → Payoff Calculation → Results JSON
 """
 import json
+import sys
+from pathlib import Path
 from datetime import datetime
-from payoff_ready_validator import validate_and_prepare_for_payoff
-from payoff_single import SinglePhoenixPayoff
-from payoff_worst_of import WorstOfPhoenixPayoff
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.payoff_ready_validator import validate_and_prepare_for_payoff
+from src.payoff_single import SinglePhoenixPayoff
+from src.payoff_worst_of import WorstOfPhoenixPayoff
 
 
 def calculate_and_save_payoff(

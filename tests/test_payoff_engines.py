@@ -5,9 +5,16 @@ Demonstrates end-to-end integration:
 PDF → Extraction → Validation → Payoff Calculation
 """
 import json
-from payoff_ready_validator import validate_and_prepare_for_payoff
-from payoff_single import SinglePhoenixPayoff
-from payoff_worst_of import WorstOfPhoenixPayoff
+import sys
+from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.payoff_ready_validator import validate_and_prepare_for_payoff
+from src.payoff_single import SinglePhoenixPayoff
+from src.payoff_worst_of import WorstOfPhoenixPayoff
 
 
 def test_single_phoenix():
@@ -17,7 +24,7 @@ def test_single_phoenix():
     print("=" * 80)
     
     # Load extracted data
-    with open("test_results_20251226_131814.json", "r") as f:
+    with open("results/test_results_20251226_131814.json", "r") as f:
         results = json.load(f)
     
     bnp_result = results[0]  # BNP Phoenix
@@ -99,7 +106,7 @@ def test_worst_of_phoenix():
     print("=" * 80)
     
     # Load extracted data
-    with open("test_results_20251226_131814.json", "r") as f:
+    with open("results/test_results_20251226_131814.json", "r") as f:
         results = json.load(f)
     
     natixis_result = results[1]  # Natixis

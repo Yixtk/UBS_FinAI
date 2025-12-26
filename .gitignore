@@ -1,3 +1,7 @@
+# Environment and API Keys
+LLM_variables.env
+.env
+
 # Python
 __pycache__/
 *.py[cod]
@@ -20,10 +24,10 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
-venv/
-ENV/
-env/
+# Test and Result Files
+results/test_results_*.json
+results/payoff_results_*.json
+results/*_comparison.json
 
 # IDE
 .vscode/
@@ -31,30 +35,15 @@ env/
 *.swp
 *.swo
 *~
-
-# Environment variables
-.env
-*.env
-LLM_variables.env
-
-# API Keys (if any)
-*_api_key.txt
-config_local.py
-
-# Test Results and Outputs
-test_results_*.json
-payoff_results_*.json
-*_comparison.json
-
-# Temporary files
-*.tmp
-*.log
-
-# OS
 .DS_Store
-Thumbs.db
 
-# Documents (optional - uncomment if you don't want to share PDFs)
-# *.pdf
-# *.docx
+# Jupyter Notebook
+.ipynb_checkpoints
 
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Scripts (temporary)
+REORGANIZE_PROJECT.sh

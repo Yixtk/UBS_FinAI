@@ -69,40 +69,37 @@ LLM_TEMPERATURE=0.0
 
 ```bash
 # Run extraction on test PDFs
-python test.py
+python -m tests.test
 
-# Output: test_results_YYYYMMDD_HHMMSS.json
+# Output: results/test_results_YYYYMMDD_HHMMSS.json
 ```
 
 ### 2. Validate Extraction Quality
 
 ```bash
 # Compare against ground truth
-python compare_with_ground_truth.py test_results_*.json
-
-# Validate payoff-readiness
-python payoff_ready_validator.py test_results_*.json
+python -m scripts.compare_with_ground_truth results/test_results_*.json
 ```
 
 ### 3. Calculate Payoffs
 
 ```bash
 # Calculate payoffs from extracted data
-python calculate_payoff_from_json.py test_results_*.json
+python -m scripts.calculate_payoff_from_json results/test_results_*.json
 
-# Output: payoff_results_YYYYMMDD_HHMMSS.json
+# Output: results/payoff_results_YYYYMMDD_HHMMSS.json
 ```
 
 ### 4. Use in Code
 
 ```python
-from prompts import PayoffExtractor
-from payoff_ready_validator import validate_and_prepare_for_payoff
-from payoff_single import SinglePhoenixPayoff
+from src.prompts import PayoffExtractor
+from src.payoff_ready_validator import validate_and_prepare_for_payoff
+from src.payoff_single import SinglePhoenixPayoff
 
 # Extract from PDF
 extractor = PayoffExtractor()
-result = extractor.extract_from_pdf("your_termsheet.pdf")
+result = extractor.extract_from_pdf("data/your_termsheet.pdf")
 
 # Validate
 validation = validate_and_prepare_for_payoff(result)
@@ -167,38 +164,47 @@ print(f"Total Value: ${coupons + payoff:.2f}")
 
 ```
 UBS_FinAI/
-├── 📄 Core Modules
+├── src/                                # Core source code
 │   ├── prompts.py                      # Main extractor with post-processing
 │   ├── prompt.py                       # LLM prompt templates
 │   ├── llm_client.py                   # LLM API client
 │   ├── document_loader.py              # PDF loader
-│   └── config.py                       # Configuration management
-│
-├── 🛡️ Validation & Testing
-│   ├── payoff_ready_validator.py       # Payoff safety validator
-│   ├── compare_with_ground_truth.py    # Accuracy evaluation
-│   ├── test.py                         # Test suite
-│   └── test_case.py                    # Test cases
-│
-├── 🧮 Payoff Engines
+│   ├── config.py                       # Configuration management
 │   ├── payoff_single.py                # Single underlying Phoenix
 │   ├── payoff_worst_of.py              # Worst-of Phoenix
-│   ├── calculate_payoff_from_json.py   # JSON → Payoff calculator
+│   └── payoff_ready_validator.py       # Payoff safety validator
+│
+├── tests/                              # Test files
+│   ├── test.py                         # Test suite
+│   ├── test_case.py                    # Test cases
 │   └── test_payoff_engines.py          # Payoff engine tests
 │
-├── 📖 Documentation
-│   ├── README.md                       # This file
-│   └── README_PAYOFF_READY.md          # Detailed technical guide
+├── scripts/                            # Utility scripts
+│   ├── calculate_payoff_from_json.py   # JSON → Payoff calculator
+│   └── compare_with_ground_truth.py    # Accuracy evaluation
 │
-├── 📑 Configuration & Data
-│   ├── requirements.txt                # Python dependencies
-│   ├── .env.example                    # Environment template
-│   └── .gitignore                      # Git ignore rules
+├── data/                               # Input PDF files
+│   ├── BNP-PhoenixSnowball-SP500-XS1083630027-TS.pdf
+│   └── IT0006764473-TS.pdf
 │
-└── 📊 Sample Data (optional)
-    ├── BNP-PhoenixSnowball-SP500-XS1083630027-TS.pdf
-    └── IT0006764473-TS.pdf
+├── results/                            # Output files (not in git)
+│   ├── test_results_*.json             # Extraction results
+│   └── payoff_results_*.json           # Payoff calculations
+│
+├── docs/                               # Documentation
+│   ├── README_PAYOFF_READY.md          # Detailed technical guide
+│   ├── PROJECT_STRUCTURE.md            # Project organization
+│   ├── SETUP.md                        # Setup instructions
+│   └── GITHUB_UPLOAD_GUIDE.md          # GitHub guide
+│
+├── README.md                           # This file
+├── requirements.txt                    # Python dependencies
+├── LICENSE                             # MIT License
+├── .gitignore                          # Git ignore rules
+└── LLM_variables.env                   # API keys (not in git)
 ```
+
+For detailed structure documentation, see [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md).
 
 ---
 

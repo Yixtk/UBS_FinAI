@@ -3,9 +3,9 @@ Main workflow for extracting payoff information from term sheets
 """
 import json
 from typing import Dict, Optional
-from llm_client import LLMClient
-from document_loader import load_pdf_text, split_text
-from prompt import (
+from src.llm_client import LLMClient
+from src.document_loader import load_pdf_text, split_text
+from src.prompt import (
     get_payoff_extraction_prompt,
     get_section_extraction_prompt,
     get_validation_prompt
